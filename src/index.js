@@ -9,10 +9,10 @@ if (environment.worker) {
 }
 
 
-module.exports = MessengerWorkerAdaptor;
+module.exports = MessengerWorker;
 
 
-function MessengerWorkerAdaptor(url) {
+function MessengerWorker(url) {
     var MESSAGE_ID = 0,
         worker = environment.worker ? globalWorker : new Worker(url),
         listeners = {},
