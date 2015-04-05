@@ -26,9 +26,10 @@ function MessengerWorker(url) {
 
         if (name) {
             if (listeners[name]) {
-                emit(listeners[name], message.data, function callback(err, data) {
+                emit(listeners[name], message.data, function callback(error, data) {
                     worker.postMessage(JSON.stringify({
                         id: id,
+                        error: error || undefined,
                         data: data
                     }));
                 });
