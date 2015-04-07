@@ -45,7 +45,9 @@ function MessengerWorker(url) {
     this.emit = function(name, data, callback) {
         var id = MESSAGE_ID++;
 
-        messages[id] = callback;
+        if (callback) {
+            messages[id] = callback;
+        }
 
         worker.postMessage(JSON.stringify({
             id: id,

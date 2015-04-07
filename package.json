@@ -7,9 +7,6 @@
     "url": "https://github.com/nathanfaucett/messenger_worker.git"
   },
   "main": "src/index.js",
-  "scripts": {
-    "example": "comn -f example/src/index.js -o example/index.js && comn -f example/src/worker.js -o example/worker.js"
-  },
   "keywords": [
     "messenger_worker",
     "messenger_worker.js"
