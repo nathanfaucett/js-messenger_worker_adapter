@@ -1,7 +1,7 @@
 {
   "name": "messenger_worker_adaptor",
   "version": "0.0.1",
-  "description": "MessengerWorkerAdaptor for the browser and node.js",
+  "description": "MessengerWorkerAdapter for the browser and node.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/nathanfaucett/messenger_worker_adaptor.git"

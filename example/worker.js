@@ -1,4 +1,4 @@
-(function(dependencies, global) {
+(function(dependencies, undefined, global) {
     var cache = [];
 
     function require(index) {
@@ -182,7 +182,7 @@ function(require, exports, module, global) {
 var environment = require(3);
 
 
-var MessengerWorkerAdaptorPrototype,
+var MessengerWorkerAdapterPrototype,
     globalWorker;
 
 
@@ -191,21 +191,21 @@ if (environment.worker) {
 }
 
 
-module.exports = MessengerWorkerAdaptor;
+module.exports = MessengerWorkerAdapter;
 
 
-function MessengerWorkerAdaptor(url) {
+function MessengerWorkerAdapter(url) {
     this.__worker = environment.worker ? globalWorker : new Worker(url);
 }
-MessengerWorkerAdaptorPrototype = MessengerWorkerAdaptor.prototype;
+MessengerWorkerAdapterPrototype = MessengerWorkerAdapter.prototype;
 
-MessengerWorkerAdaptorPrototype.addMessageListener = function(callback) {
+MessengerWorkerAdapterPrototype.addMessageListener = function(callback) {
     this.__worker.addEventListener("message", function onMessage(e) {
         callback(JSON.parse(e.data));
     });
 };
 
-MessengerWorkerAdaptorPrototype.postMessage = function(data) {
+MessengerWorkerAdapterPrototype.postMessage = function(data) {
     this.__worker.postMessage(JSON.stringify(data));
 };
 
@@ -242,4 +242,4 @@ environment.pixelRatio = environment.window.devicePixelRatio || 1;
 environment.document = typeof(document) !== "undefined" ? document : {};
 
 
-}], (new Function("return this;"))()));
+}], void 0, (new Function("return this;"))()));

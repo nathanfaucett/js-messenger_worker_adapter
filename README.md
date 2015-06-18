@@ -1,4 +1,4 @@
-MessengerWorkerAdaptor
+MessengerWorkerAdapter
 =======
 
-MessengerWorkerAdaptor for the browser and node.js
+MessengerWorkerAdapter for the browser and node.js
