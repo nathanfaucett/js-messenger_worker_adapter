@@ -1,15 +1,15 @@
 {
-  "name": "messenger_worker_adaptor",
+  "name": "messenger_worker_adapter",
   "version": "0.0.1",
   "description": "MessengerWorkerAdapter for the browser and node.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nathanfaucett/messenger_worker_adaptor.git"
+    "url": "https://github.com/nathanfaucett/messenger_worker_adapter.git"
   },
   "main": "src/index.js",
   "keywords": [
-    "messenger_worker_adaptor",
-    "messenger_worker_adaptor.js"
+    "messenger_worker_adapter",
+    "messenger_worker_adapter.js"
   ],
   "scripts": {
     "example": "comn -f example/src/index.js -o  example/index.js && comn -f  example/src/worker.js -o  example/worker.js"
