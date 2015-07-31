@@ -67,7 +67,7 @@ var MESSENGER_ID = 0,
 module.exports = Messenger;
 
 
-function Messenger(adaptor) {
+function Messenger(adapter) {
     var _this = this;
 
     this.__id = (MESSENGER_ID++).toString(36);
@@ -75,9 +75,9 @@ function Messenger(adaptor) {
     this.__callbacks = {};
     this.__listeners = {};
 
-    this.__adaptor = adaptor;
+    this.__adapter = adapter;
 
-    adaptor.addMessageListener(function onMessage(data) {
+    adapter.addMessageListener(function onMessage(data) {
         _this.onMessage(data);
     });
 }
@@ -88,15 +88,15 @@ MessengerPrototype.onMessage = function(message) {
         name = message.name,
         callbacks = this.__callbacks,
         callback = callbacks[id],
-        listeners, adaptor;
+        listeners, adapter;
 
     if (name) {
         listeners = this.__listeners;
-        adaptor = this.__adaptor;
+        adapter = this.__adapter;
 
         if (listeners[name]) {
-            emit(listeners[name], message.data, function callback(error, data) {
-                adaptor.postMessage({
+            Messenger_emit(this, listeners[name], message.data, function emitCallback(error, data) {
+                adapter.postMessage({
                     id: id,
                     error: error || undefined,
                     data: data
@@ -105,7 +105,7 @@ MessengerPrototype.onMessage = function(message) {
         }
     } else {
         if (callback && isMatch(id, this.__id)) {
-            callback(message.error, message.data);
+            callback(message.error, message.data, this);
             delete callbacks[id];
         }
     }
@@ -118,12 +118,14 @@ MessengerPrototype.emit = function(name, data, callback) {
         this.__callbacks[id] = callback;
     }
 
-    this.__adaptor.postMessage({
+    this.__adapter.postMessage({
         id: id,
         name: name,
         data: data
     });
 };
+
+MessengerPrototype.send = MessengerPrototype.emit;
 
 MessengerPrototype.on = function(name, callback) {
     var listeners = this.__listeners,
@@ -145,26 +147,30 @@ MessengerPrototype.off = function(name, callback) {
                 listener.splice(i, 1);
             }
         }
+
+        if (listener.length === 0) {
+            delete listeners[name];
+        }
     }
 };
 
-function emit(listeners, data, callback) {
+function Messenger_emit(_this, listeners, data, callback) {
     var index = 0,
         length = listeners.length,
         called = false;
 
-    function done(err, data) {
+    function done(error, data) {
         if (called === false) {
             called = true;
-            callback(err, data);
+            callback(error, data);
         }
     }
 
-    function next(err, data) {
-        if (err || index === length) {
-            done(err, data);
+    function next(error, data) {
+        if (error || index === length) {
+            done(error, data);
         } else {
-            listeners[index++](data, next);
+            listeners[index++](data, next, _this);
         }
     }
 
@@ -179,7 +185,8 @@ function isMatch(messageId, id) {
 },
 function(require, exports, module, global) {
 
-var environment = require(3);
+var isString = require(3),
+    environment = require(4);
 
 
 var MessengerWorkerAdapterPrototype,
@@ -195,7 +202,7 @@ module.exports = MessengerWorkerAdapter;
 
 
 function MessengerWorkerAdapter(url) {
-    this.__worker = environment.worker ? globalWorker : new Worker(url);
+    this.__worker = environment.worker ? globalWorker : (isString(url) ? new Worker(url) : url);
 }
 MessengerWorkerAdapterPrototype = MessengerWorkerAdapter.prototype;
 
@@ -208,6 +215,17 @@ MessengerWorkerAdapterPrototype.addMessageListener = function(callback) {
 MessengerWorkerAdapterPrototype.postMessage = function(data) {
     this.__worker.postMessage(JSON.stringify(data));
 };
+
+
+},
+function(require, exports, module, global) {
+
+module.exports = isString;
+
+
+function isString(obj) {
+    return typeof(obj) === "string" || false;
+}
 
 
 },

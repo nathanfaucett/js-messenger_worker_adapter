@@ -2305,14 +2305,14 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 function(require, exports, module, global) {
 
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
-  var e, m,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      nBits = -7,
-      i = isLE ? (nBytes - 1) : 0,
-      d = isLE ? -1 : 1,
-      s = buffer[offset + i]
+  var e, m
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var nBits = -7
+  var i = isLE ? (nBytes - 1) : 0
+  var d = isLE ? -1 : 1
+  var s = buffer[offset + i]
 
   i += d
 
@@ -2338,14 +2338,14 @@ exports.read = function (buffer, offset, isLE, mLen, nBytes) {
 }
 
 exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c,
-      eLen = nBytes * 8 - mLen - 1,
-      eMax = (1 << eLen) - 1,
-      eBias = eMax >> 1,
-      rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0),
-      i = isLE ? 0 : (nBytes - 1),
-      d = isLE ? 1 : -1,
-      s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
+  var e, m, c
+  var eLen = nBytes * 8 - mLen - 1
+  var eMax = (1 << eLen) - 1
+  var eBias = eMax >> 1
+  var rt = (mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0)
+  var i = isLE ? 0 : (nBytes - 1)
+  var d = isLE ? 1 : -1
+  var s = value < 0 || (value === 0 && 1 / value < 0) ? 1 : 0
 
   value = Math.abs(value)
 
@@ -2466,7 +2466,7 @@ var MESSENGER_ID = 0,
 module.exports = Messenger;
 
 
-function Messenger(adaptor) {
+function Messenger(adapter) {
     var _this = this;
 
     this.__id = (MESSENGER_ID++).toString(36);
@@ -2474,9 +2474,9 @@ function Messenger(adaptor) {
     this.__callbacks = {};
     this.__listeners = {};
 
-    this.__adaptor = adaptor;
+    this.__adapter = adapter;
 
-    adaptor.addMessageListener(function onMessage(data) {
+    adapter.addMessageListener(function onMessage(data) {
         _this.onMessage(data);
     });
 }
@@ -2487,15 +2487,15 @@ MessengerPrototype.onMessage = function(message) {
         name = message.name,
         callbacks = this.__callbacks,
         callback = callbacks[id],
-        listeners, adaptor;
+        listeners, adapter;
 
     if (name) {
         listeners = this.__listeners;
-        adaptor = this.__adaptor;
+        adapter = this.__adapter;
 
         if (listeners[name]) {
-            emit(listeners[name], message.data, function callback(error, data) {
-                adaptor.postMessage({
+            Messenger_emit(this, listeners[name], message.data, function emitCallback(error, data) {
+                adapter.postMessage({
                     id: id,
                     error: error || undefined,
                     data: data
@@ -2504,7 +2504,7 @@ MessengerPrototype.onMessage = function(message) {
         }
     } else {
         if (callback && isMatch(id, this.__id)) {
-            callback(message.error, message.data);
+            callback(message.error, message.data, this);
             delete callbacks[id];
         }
     }
@@ -2517,12 +2517,14 @@ MessengerPrototype.emit = function(name, data, callback) {
         this.__callbacks[id] = callback;
     }
 
-    this.__adaptor.postMessage({
+    this.__adapter.postMessage({
         id: id,
         name: name,
         data: data
     });
 };
+
+MessengerPrototype.send = MessengerPrototype.emit;
 
 MessengerPrototype.on = function(name, callback) {
     var listeners = this.__listeners,
@@ -2544,26 +2546,30 @@ MessengerPrototype.off = function(name, callback) {
                 listener.splice(i, 1);
             }
         }
+
+        if (listener.length === 0) {
+            delete listeners[name];
+        }
     }
 };
 
-function emit(listeners, data, callback) {
+function Messenger_emit(_this, listeners, data, callback) {
     var index = 0,
         length = listeners.length,
         called = false;
 
-    function done(err, data) {
+    function done(error, data) {
         if (called === false) {
             called = true;
-            callback(err, data);
+            callback(error, data);
         }
     }
 
-    function next(err, data) {
-        if (err || index === length) {
-            done(err, data);
+    function next(error, data) {
+        if (error || index === length) {
+            done(error, data);
         } else {
-            listeners[index++](data, next);
+            listeners[index++](data, next, _this);
         }
     }
 
@@ -2578,7 +2584,8 @@ function isMatch(messageId, id) {
 },
 function(require, exports, module, global) {
 
-var environment = require(12);
+var isString = require(12),
+    environment = require(13);
 
 
 var MessengerWorkerAdapterPrototype,
@@ -2594,7 +2601,7 @@ module.exports = MessengerWorkerAdapter;
 
 
 function MessengerWorkerAdapter(url) {
-    this.__worker = environment.worker ? globalWorker : new Worker(url);
+    this.__worker = environment.worker ? globalWorker : (isString(url) ? new Worker(url) : url);
 }
 MessengerWorkerAdapterPrototype = MessengerWorkerAdapter.prototype;
 
@@ -2607,6 +2614,17 @@ MessengerWorkerAdapterPrototype.addMessageListener = function(callback) {
 MessengerWorkerAdapterPrototype.postMessage = function(data) {
     this.__worker.postMessage(JSON.stringify(data));
 };
+
+
+},
+function(require, exports, module, global) {
+
+module.exports = isString;
+
+
+function isString(obj) {
+    return typeof(obj) === "string" || false;
+}
 
 
 },

@@ -24,6 +24,7 @@
     "messenger": "git://github.com/nathanfaucett/messenger"
   },
   "dependencies": {
-    "environment": "git://github.com/nathanfaucett/environment"
+    "is_string": "git://github.com/nathanfaucett/is_string.git",
+    "environment": "git://github.com/nathanfaucett/environment.git"
   }
 }

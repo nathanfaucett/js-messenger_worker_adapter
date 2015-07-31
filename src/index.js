@@ -1,4 +1,5 @@
-var environment = require("environment");
+var isString = require("is_string"),
+    environment = require("environment");
 
 
 var MessengerWorkerAdapterPrototype,
@@ -14,7 +15,7 @@ module.exports = MessengerWorkerAdapter;
 
 
 function MessengerWorkerAdapter(url) {
-    this.__worker = environment.worker ? globalWorker : new Worker(url);
+    this.__worker = environment.worker ? globalWorker : (isString(url) ? new Worker(url) : url);
 }
 MessengerWorkerAdapterPrototype = MessengerWorkerAdapter.prototype;
 
