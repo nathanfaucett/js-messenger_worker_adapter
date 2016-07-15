@@ -1,5 +1,5 @@
-var assert = require("assert"),
-    Messenger = require("messenger"),
+var assert = require("@nathanfaucett/assert"),
+    Messenger = require("@nathanfaucett/messenger"),
     MessengerWorkerAdaptor = require("../../src/index");
 
 

@@ -1,5 +1,5 @@
-var isString = require("is_string"),
-    environment = require("environment");
+var isString = require("@nathanfaucett/is_string"),
+    environment = require("@nathanfaucett/environment");
 
 
 var MessengerWorkerAdapterPrototype,

@@ -1,5 +1,17 @@
-(function(dependencies, undefined, global) {
+(function(dependencies, chunks, undefined, global) {
+    
     var cache = [];
+    
+
+    function Module() {
+        this.id = null;
+        this.filename = null;
+        this.dirname = null;
+        this.exports = {};
+        this.loaded = false;
+    }
+
+    Module.prototype.require = require;
 
     function require(index) {
         var module = cache[index],
@@ -9,14 +21,13 @@
             return module.exports;
         } else {
             callback = dependencies[index];
-            exports = {};
 
-            cache[index] = module = {
-                exports: exports,
-                require: require
-            };
+            cache[index] = module = new Module();
+            exports = module.exports;
 
-            callback.call(exports, require, exports, module, global);
+            callback.call(exports, require, exports, module, undefined, global);
+            module.loaded = true;
+
             return module.exports;
         }
     }
@@ -24,6 +35,14 @@
     require.resolve = function(path) {
         return path;
     };
+
+    
+
+    require.async = function async(index, callback) {
+        callback(require(index));
+    };
+
+    
 
     if (typeof(define) === "function" && define.amd) {
         define([], function() {
@@ -37,7 +56,8 @@
         
     }
 }([
-function(require, exports, module, global) {
+function(require, exports, module, undefined, global) {
+/* worker.js */
 
 var Messenger = require(1),
     MessengerWorkerAdaptor = require(2);
@@ -45,7 +65,7 @@ var Messenger = require(1),
 
 var adaptor = new MessengerWorkerAdaptor(),
     messenger = new Messenger(adaptor);
-
+    
 
 function onPing(data, next) {
     console.log(data.data);
@@ -58,7 +78,8 @@ messenger.on("ping", onPing);
 
 
 },
-function(require, exports, module, global) {
+function(require, exports, module, undefined, global) {
+/* ../../node_modules/messenger/src/index.js */
 
 var MESSENGER_ID = 0,
     MessengerPrototype;
@@ -183,7 +204,8 @@ function isMatch(messageId, id) {
 
 
 },
-function(require, exports, module, global) {
+function(require, exports, module, undefined, global) {
+/* ../../src/index.js */
 
 var isString = require(3),
     environment = require(4);
@@ -197,6 +219,7 @@ if (environment.worker) {
     globalWorker = self;
 }
 
+console.log(globalWorker);
 
 module.exports = MessengerWorkerAdapter;
 
@@ -218,7 +241,8 @@ MessengerWorkerAdapterPrototype.postMessage = function(data) {
 
 
 },
-function(require, exports, module, global) {
+function(require, exports, module, undefined, global) {
+/* ../../node_modules/is_string/src/index.js */
 
 module.exports = isString;
 
@@ -229,7 +253,8 @@ function isString(obj) {
 
 
 },
-function(require, exports, module, global) {
+function(require, exports, module, undefined, global) {
+/* ../../node_modules/environment/src/index.js */
 
 var environment = exports,
 
@@ -260,4 +285,4 @@ environment.pixelRatio = environment.window.devicePixelRatio || 1;
 environment.document = typeof(document) !== "undefined" ? document : {};
 
 
-}], void 0, (new Function("return this;"))()));
+}], null, void(0), (new Function("return this;"))()));
